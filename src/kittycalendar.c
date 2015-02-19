@@ -11,7 +11,7 @@
 
 #include "kittycalendar.h"
 
-G_DEFINE_TYPE(KittyCalendar, kitty_calendar, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE(KittyCalendar, kitty_calendar, GTK_TYPE_APPLICATION_WINDOW)
 
 /* Boilerplate GObject code */
 static void kitty_calendar_class_init(KittyCalendarClass *klass);
@@ -22,6 +22,8 @@ static void init_styles(KittyCalendar *self);
 static void adjust_placement(KittyCalendar *self);
 static void adjust_date(KittyCalendar *self);
 static void click_handler(KittyCalendar *self, GtkToggleButton *button);
+
+static KittyCalendar *kapp = NULL;
 
 /* Initialisation */
 static void kitty_calendar_class_init(KittyCalendarClass *klass)
@@ -56,6 +58,7 @@ static void kitty_calendar_init(KittyCalendar *self)
 
         /* Button styling */
         button = gtk_toggle_button_new();
+        self->button = button;
         gtk_widget_set_can_focus(button, FALSE);
         gtk_widget_set_hexpand(button, FALSE);
         gtk_widget_set_halign(button, GTK_ALIGN_END);
@@ -99,8 +102,6 @@ static void kitty_calendar_init(KittyCalendar *self)
         gtk_revealer_set_reveal_child(GTK_REVEALER(rev), FALSE);
         gtk_revealer_set_transition_type(GTK_REVEALER(rev), GTK_REVEALER_TRANSITION_TYPE_SLIDE_UP);
 
-        g_signal_connect(G_OBJECT(self), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
         adjust_date(self);
         adjust_placement(self);
 
@@ -113,12 +114,21 @@ static void kitty_calendar_dispose(GObject *object)
 }
 
 /* Utility; return a new KittyCalendar */
-KittyCalendar *kitty_calendar_new(void)
+KittyCalendar *kitty_calendar_new(GApplication *application)
 {
         KittyCalendar *self;
 
-        self = g_object_new(KITTY_CALENDAR_TYPE, NULL);
+        self = g_object_new(KITTY_CALENDAR_TYPE, "application", application, NULL);
         return self;
+}
+
+void kitty_calendar_toggle(KittyCalendar *self)
+{
+        if (!self) {
+                return;
+        }
+        gboolean active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(self->button));
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->button), !active);
 }
 
 /**
@@ -200,16 +210,29 @@ static void click_handler(KittyCalendar *self, GtkToggleButton *button)
         }
 }
 
+static void app_activate(GApplication *app, gpointer udata)
+{
+        if (!kapp) {
+                kapp = kitty_calendar_new(app);
+                gtk_widget_show(GTK_WIDGET(kapp));
+                gtk_window_present(GTK_WINDOW(kapp));
+        } else {
+                kitty_calendar_toggle(kapp);
+        }
+}
+
 /**
  * TODO: Convert to GtkApplication, etc.
  */
 int main(int argc, char **argv)
 {
-        KittyCalendar *cal = NULL;
-        gtk_init(&argc, &argv);
+        GtkApplication *app = NULL;
+        int status;
 
-        cal = kitty_calendar_new();
-        gtk_main();
+        app = gtk_application_new("com.evolve-os.kittycalendar", G_APPLICATION_FLAGS_NONE);
+        g_signal_connect(G_OBJECT(app), "activate", G_CALLBACK(app_activate), NULL);
+        status = g_application_run(G_APPLICATION(app), argc, argv);
 
-        return 0;
+        g_object_unref(app);
+        return status;
 }

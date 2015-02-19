@@ -27,14 +27,15 @@ typedef struct _KittyCalendarClass   KittyCalendarClass;
 
 /* KittyCalendar object */
 struct _KittyCalendar {
-        GtkWindow parent;
+        GtkApplicationWindow parent;
         GtkWidget *cal;
         GtkWidget *rev;
+        GtkWidget *button;
 };
 
 /* KittyCalendar class definition */
 struct _KittyCalendarClass {
-        GtkWindowClass parent_class;
+        GtkApplicationWindowClass parent_class;
 };
 
 GType kitty_calendar_get_type(void);
@@ -43,8 +44,15 @@ GType kitty_calendar_get_type(void);
 
 /**
  * Construct a new KittyCalendar
+ *
+ * @param app Parent application instance
  * @return A new KittyCalendar
  */
-KittyCalendar *kitty_calendar_new(void);
+KittyCalendar *kitty_calendar_new(GApplication *application);
+
+/**
+ * Toggle the active state of the KittyCalendar
+ */
+void kitty_calendar_toggle(KittyCalendar *cal);
 
 #endif /* kitty_calendar_h */
