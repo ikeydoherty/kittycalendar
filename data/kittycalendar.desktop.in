@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=KittyCalendar
+Comment=On Screen Calendar
+Exec=@prefix@/bin/kitty-calendar
+Terminal=false
+Type=Application
+Categories=
+NoDisplay=true

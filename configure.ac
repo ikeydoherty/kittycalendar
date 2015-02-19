@@ -14,6 +14,7 @@ PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.38.0])
 PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.12.0])
 
 AC_CONFIG_FILES([Makefile
+                 data/kittycalendar.desktop
                  data/Makefile
                  src/Makefile])
 AC_OUTPUT
