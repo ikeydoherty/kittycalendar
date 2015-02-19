@@ -1,0 +1,10 @@
+GtkWindow {
+    background-color: transparent;
+}
+
+GtkCalendar {
+    border-radius: 3px;
+}
+.cal-button {
+    border-radius: 3px;
+}
